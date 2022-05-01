@@ -10,9 +10,11 @@
 #include <stdint.h>
 #include <sys/stat.h>
 
+#define KB 1024
+
 struct Options {
     char infile[128] = "null";
-    long long size = 1024;
+    long long size = KB;
     size_t count = 1;
 } opts;
 
@@ -54,21 +56,23 @@ void ParseOptions(int argc, char** argv) {
                 strcpy(opts.infile, optarg);
                 break;
             case 's':
-                if((opts.size = atoll(optarg)) <= 0){
+            {
+                char *tmpptr = optarg;
+                if((opts.size = strtoll(optarg, &tmpptr, 10)) <= 0 || tmpptr != optarg){
                     if((strstr(optarg, "KB") != NULL || strstr(optarg, "MB") != NULL) && isdigit(*optarg)){
                         char number[64] = { 0 };
                         for(uint8_t i = 0; i < strlen(optarg) && isdigit(optarg[i]); i++)
                             number[i] = optarg[i];
                         if(strstr(optarg, "KB") != NULL)
-                            opts.size = atoll(number) * 1024;
+                            opts.size = atoll(number) * KB;
                         else
-                            opts.size = atoll(number) * 1024 * 1024;
+                            opts.size = atoll(number) * KB * KB;
                     } else {
                         PrintHelpMessage((char *)"invalid size specified");
                         exit(EXIT_FAILURE);
                     }
                 }
-                break;
+            } break;
             case 'c':
                 if((opts.count = atoi(optarg)) <= 0){
                     PrintHelpMessage((char *)"invalid number of files to generate is specified");
