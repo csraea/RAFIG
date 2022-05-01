@@ -1,0 +1,2 @@
+# RAFIG
+Random File Generator
