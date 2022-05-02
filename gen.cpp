@@ -101,7 +101,6 @@ ssize_t Copy(int fd1, int fd2, off_t fileOffset1, off_t fileOffset2, long long a
         if((ret = pwrite(fd2, buf, ret, fileOffset2)) != 0){
             if (ret == -1) {
                 if (errno == EINTR) continue; // handling some frequent interruptions
-                printf("B, %d\n", errno);
                 return -1;
             }
         }
