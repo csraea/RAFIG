@@ -172,11 +172,12 @@ void Magic(){
             sprintf(filename, "./out/%drand%zu.bin", opts.rprob, i+1);
             int fd2 = open(filename, O_CREAT | O_WRONLY | O_TRUNC | O_APPEND, 0777);
 
-            for(size_t i = 0; i < opts.size; i++){
+            for(long long i = 0; i < opts.size; ){
                 int r = rand() % 255;
 
                 if(opts.rprob == 0){                // no repetition
-
+                    
+                    i++;
                     ssize_t res = write(fd2, &r, 1);
                     if(res == -1) {
                         PrintHelpMessage((char *)"file write exited with failure");
@@ -188,13 +189,13 @@ void Magic(){
 
                     do {                            // random
 
+                        i++;
                         ssize_t res = write(fd2, &r, 1);
                         if(res == -1) {
                             PrintHelpMessage((char *)"file write exited with failure");
                             close(fd2);
                             exit(EXIT_FAILURE);
                         }
-                        i++;
 
                     } while (rand() % 100 >= rand() % 100 && i < opts.size);
 
@@ -202,13 +203,13 @@ void Magic(){
 
                     do {                            // specified probability of symbol repetition
 
+                        i++;
                         ssize_t res = write(fd2, &r, 1);
                         if(res == -1) {
                             PrintHelpMessage((char *)"file write exited with failure");
                             close(fd2);
                             exit(EXIT_FAILURE);
                         }
-                        i++;
 
                     } while (rand() % 100 <= opts.rprob && i < opts.size);
 
