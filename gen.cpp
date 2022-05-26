@@ -186,11 +186,7 @@ void Magic(){
 
                 } else if(opts.rprob == -1) {
 
-                    int tmpprob;
-
                     do {                            // random
-
-                        tmpprob = rand() % 100;
 
                         ssize_t res = write(fd2, &r, 1);
                         if(res == -1) {
@@ -200,7 +196,7 @@ void Magic(){
                         }
                         i++;
 
-                    } while (rand() % 100 <= tmpprob && i < opts.size);
+                    } while (rand() % 100 >= rand() % 100 && i < opts.size);
 
                 } else {
 
