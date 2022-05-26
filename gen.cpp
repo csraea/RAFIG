@@ -16,6 +16,7 @@ struct Options {
     char infile[128] = "null";
     long long size = KB;
     size_t count = 1;
+    short rprob = -1;
 } opts;
 
 void PrintHelpMessage(char* msg){
@@ -26,6 +27,7 @@ void PrintHelpMessage(char* msg){
         printf("\033[1m" "Usage:" "\033[22m" " [OPTION]...\n"); 
         printf("\033[1m" " -i. --infile:""\033[22m" "    a file to get contents seeking from random position.\n");
         printf("\033[1m" " -s, --size:""\033[22m" "      a size of an output file, 1KB by default.\n");
+        printf("\033[1m" " -r, --repeat:""\033[22m" "    probability of symbol repetition (in %%) if -i specified.\n");
         printf("\033[1m" " -c, --count:""\033[22m" "     number of output files to generate.\n");
     }
 }
@@ -43,10 +45,11 @@ void ParseOptions(int argc, char** argv) {
             { "infile",    required_argument, 0, 'i' },
             { "size",      required_argument, 0, 's' }, 
             { "count",     required_argument, 0, 'c' },
+            { "repeat",    required_argument, 0, 'r' },
             { "help",      no_argument,       0, 'h' },
             { 0,             0,               0,  0  },
         };
-        c = getopt_long(argc, argv, "i:s:c:h", long_options, &option_index);
+        c = getopt_long(argc, argv, "i:s:r:c:h", long_options, &option_index);
         if (c == -1)
             break; 
         
@@ -73,6 +76,12 @@ void ParseOptions(int argc, char** argv) {
                     }
                 }
             } break;
+            case 'r':
+                if((opts.rprob = atoi(optarg)) < 0 || opts.rprob > 100){
+                    PrintHelpMessage((char *)"invalid probability of symbol repetition specified");
+                    exit(EXIT_FAILURE);
+                }
+                break;
             case 'c':
                 if((opts.count = atoi(optarg)) <= 0){
                     PrintHelpMessage((char *)"invalid number of files to generate is specified");
@@ -166,11 +175,44 @@ void Magic(){
 
             for(size_t i = 0; i < opts.size; i++){
                 int r = rand() % 255;
-                ssize_t res = write(fd2, &r, 1);
-                if(res == -1) {
-                    PrintHelpMessage((char *)"file write exited with failure");
-                    close(fd2);
-                    exit(EXIT_FAILURE);
+
+                if(opts.rprob == 0){                // no repetition
+
+                    ssize_t res = write(fd2, &r, 1);
+                    if(res == -1) {
+                        PrintHelpMessage((char *)"file write exited with failure");
+                        close(fd2);
+                        exit(EXIT_FAILURE);
+                    }
+
+                } else if(opts.rprob == -1) {
+
+                    do {                            // random
+
+                        ssize_t res = write(fd2, &r, 1);
+                        if(res == -1) {
+                            PrintHelpMessage((char *)"file write exited with failure");
+                            close(fd2);
+                            exit(EXIT_FAILURE);
+                        }
+                        i++;
+
+                    } while (rand() > rand() && i < opts.size);
+
+                } else {
+
+                    do {                            // specified probability of symbol repetition
+
+                        ssize_t res = write(fd2, &r, 1);
+                        if(res == -1) {
+                            PrintHelpMessage((char *)"file write exited with failure");
+                            close(fd2);
+                            exit(EXIT_FAILURE);
+                        }
+                        i++;
+
+                    } while (rand() % 100 <= opts.rprob && i < opts.size);
+
                 }
             }
 
