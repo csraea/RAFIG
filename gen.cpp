@@ -169,7 +169,7 @@ void Magic(){
         for(size_t i = 0; i < opts.count; i++){
 
             char filename[32] = { 0 };
-            sprintf(filename, "./out/rand%zu.bin", i+1);
+            sprintf(filename, "./out/%drand%zu.bin", opts.rprob, i+1);
             int fd2 = open(filename, O_CREAT | O_WRONLY | O_TRUNC | O_APPEND, 0777);
 
             for(size_t i = 0; i < opts.size; i++){
